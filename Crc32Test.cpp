@@ -8,6 +8,9 @@
 #include <cstdlib>
 #include <cstdio>
 
+#ifdef USE_ISA_LIB
+#include <isa-l/crc.h>
+#endif
 
 // //////////////////////////////////////////////////////////
 // test code
@@ -138,6 +141,25 @@ int main(int, char**)
   printf(" 16 bytes at once: CRC=%08X, %.3fs, %.3f MB/s (including prefetching)\n",
          crc, duration, (NumBytes / (1024*1024)) / duration);
 #endif // CRC32_USE_LOOKUP_TABLE_SLICING_BY_16
+
+#ifdef USE_ISA_LIB
+  // ISA-L ieee
+  startTime = seconds();
+  crc = crc32_ieee(0, (uint8_t*)data, NumBytes);
+  duration  = seconds() - startTime;
+  printf(" ISA-L ieee: CRC=%08X, %.3fs, %.3f MB/s\n",
+		  crc, duration, (NumBytes / (1024*1024)) / duration);
+
+  // ISA-L iscsi
+  startTime = seconds();
+  crc = crc32_iscsi((uint8_t*)data, NumBytes, 0);
+  duration  = seconds() - startTime;
+  printf(" ISA-L iscsi: CRC=%08X, %.3fs, %.3f MB/s\n",
+		  crc, duration, (NumBytes / (1024*1024)) / duration);
+
+#else
+#error "No ISA-L"
+#endif
 
   // process in 4k chunks
   startTime = seconds();
