@@ -63,7 +63,7 @@ int main(int, char**)
   // re-use variables
   double startTime, duration;
   uint32_t crc;
-
+#if 0
   // bitwise
   startTime = seconds();
   crc = crc32_bitwise(data, NumBytes);
@@ -142,6 +142,8 @@ int main(int, char**)
          crc, duration, (NumBytes / (1024*1024)) / duration);
 #endif // CRC32_USE_LOOKUP_TABLE_SLICING_BY_16
 
+#endif // 0
+
 #ifdef USE_ISA_LIB
   // ISA-L ieee
   startTime = seconds();
@@ -157,9 +159,25 @@ int main(int, char**)
   printf(" ISA-L iscsi: CRC=%08X, %.3fs, %.3f MB/s\n",
 		  crc, duration, (NumBytes / (1024*1024)) / duration);
 
-#else
+#elif(ARCH != aarch64)
 #error "No ISA-L"
 #endif
+
+#ifdef __ARM_FEATURE_CRC32
+  // ARM  iscsi
+  startTime = seconds();
+  crc = crc32c_arm_update(0, (uint8_t*)data, NumBytes);
+  duration  = seconds() - startTime;
+  printf(" ARM iscsi: CRC=%08X, %.3fs, %.3f MB/s\n",
+		  crc, duration, (NumBytes / (1024*1024)) / duration);
+#endif
+
+  // CRC32 MLNX
+  startTime = seconds();
+  crc = ieee_crc32_update(0, (uint8_t*)data, NumBytes);
+  duration  = seconds() - startTime;
+  printf(" MLNX CRC32: CRC=%08X, %.3fs, %.3f MB/s\n",
+		  crc, duration, (NumBytes / (1024*1024)) / duration);
 
   // process in 4k chunks
   startTime = seconds();

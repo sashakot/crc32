@@ -13,17 +13,18 @@ ifneq ($(USE_ISA_LIB),0)
 	LIBS += -lisal
 endif
 
-$(info Using ISA-L lib $(USE_ISA_LIB))
-$(info CFLAGS $(CFLAGS))
-$(info LIBS  $(LIBS))
-
 ARCH=$(shell uname -m)
+CFLAGS += -DARCH=$(ARCH)
+
 ifeq ($(ARCH), aarch64)
 	CFLAGS += -march=armv8-a+crc
 	LDFLAGS += -march=armv8-a+crc
 endif
 
 $(info ARCH $(ARCH))
+$(info Using ISA-L lib $(USE_ISA_LIB))
+$(info CFLAGS $(CFLAGS))
+$(info LIBS  $(LIBS))
 
 default: $(PROGRAM)
 all: default
